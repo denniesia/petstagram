@@ -3,4 +3,4 @@ from .models import Pet
 # Register your models here.
 @admin.register(Pet)
 class Pet(admin.ModelAdmin):
-    pass
+    list_display = ('name', 'slug')
