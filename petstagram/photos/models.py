@@ -5,7 +5,7 @@ from .validators import FileSizeValidator
 # Create your models here.
 class Photo(models.Model):
     photo = models.ImageField(
-        upload_to='mediafiles',
+        upload_to='',
         validators=[
             FileSizeValidator(5)
         ]
