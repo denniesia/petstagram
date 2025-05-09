@@ -81,7 +81,7 @@
 
          {% for pet in photo.tagged_pets.all %}
             <!-- Link to First Tagged Pet Details Page-->
-            <a href="{% url 'pet-details' "username" pet.slug %}">
+            <a href="{% url 'details-pet' "username" pet.slug %}">
                 <p class="message">
                     <b>{{ pet.name}}</b>
                 </p>
