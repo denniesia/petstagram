@@ -3,6 +3,9 @@ from petstagram.photos.models import Photo
 from petstagram.common.models import Like
 from petstagram.common.forms import CommentForm, SearchForm
 from pyperclip import copy
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+
 # Create your views here.
 def home_page(request):
     all_photos = Photo.objects.all()
@@ -13,6 +16,18 @@ def home_page(request):
         all_photos = all_photos.filter(
             tagged_pets__name__icontains=search_form.cleaned_data['pet_name']
         )
+    photos_per_page = 1
+    paginator = Paginator(all_photos, photos_per_page)
+    page_number = request.GET.get('page')
+
+    try:
+        all_photos = paginator.page(page_number)
+    except PageNotAnInteger:
+        all_photos = paginator.page(1)
+    except EmptyPage:
+        all_photos = paginator.page(paginator.num_pages)
+
+
     context = {
         'all_photos': all_photos,
         'comment_form': comment_form,
