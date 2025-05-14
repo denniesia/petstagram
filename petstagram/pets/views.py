@@ -3,7 +3,7 @@ from django.urls import reverse_lazy
 from petstagram.pets.models import Pet
 from petstagram.pets.forms import PetAddForm, PetEditForm, PetDeleteForm
 from petstagram.common.forms import CommentForm
-from django.views.generic import CreateView
+from django.views.generic import CreateView, DetailView
 # Create your views here.
 
 class AddPetView(CreateView):
@@ -26,6 +26,7 @@ class AddPetView(CreateView):
 #
 #     return render(request, 'pets/pet-add-page.html', context)
 
+
 def pet_edit_page(request, username, pet_slug):
     pet = Pet.objects.get(slug=pet_slug)
     form = PetEditForm(request.POST or None, instance=pet) #instance, so that the data is already filled
@@ -42,20 +43,30 @@ def pet_edit_page(request, username, pet_slug):
 
     return render(request, 'pets/pet-edit-page.html', context)
 
+class PetDetailsView(DetailView):
+    model = Pet
+    template_name = 'pets/pet-details-page.html'
+    slug_url_kwarg = 'pet_slug'
 
-def pet_details_page(request, username, pet_slug):
-    pet = Pet.objects.get(slug=pet_slug) #unique identifier
-    all_photos = pet.photo_set.all()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['all_photos'] = context['pet'].photo_set.all()
+        context['comment_form'] = CommentForm()
+        return context
 
-    comment_form = CommentForm()
-
-    context = {
-        'pet': pet,
-        'all_photos': all_photos,
-        'comment_form': comment_form,
-
-    }
-    return render(request, 'pets/pet-details-page.html', context)
+# def pet_details_page(request, username, pet_slug):
+#     pet = Pet.objects.get(slug=pet_slug) #unique identifier
+#     all_photos = pet.photo_set.all()
+#
+#     comment_form = CommentForm()
+#
+#     context = {
+#         'pet': pet,
+#         'all_photos': all_photos,
+#         'comment_form': comment_form,
+#
+#     }
+#     return render(request, 'pets/pet-details-page.html', context)
 
 def pet_delete_page(request, username, pet_slug):
     pet = Pet.objects.get(slug=pet_slug)
