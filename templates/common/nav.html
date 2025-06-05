@@ -24,6 +24,7 @@
                         <i>Add Photo</i>
                     </a>
                 </li>
+                {% if not request.user.is_authenticated %}
                 <li class="nav-item">
                     <!-- Link to Login Page -->
                     <a href="{% url 'login' %}">
@@ -36,9 +37,10 @@
                         <i>Register</i>
                     </a>
                 </li>
+                 {% endif %}
                 <li class="nav-item">
                     <!-- Link to Profile Page -->
-                    <a href="#">
+                    <a href="{% url 'profile-details' request.user.pk %}">
                         <i>Profile</i>
                     </a>
                 </li>
