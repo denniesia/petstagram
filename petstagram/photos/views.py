@@ -12,6 +12,14 @@ class PhotoAddView(CreateView): #support File Handling in get_form_kwargs()
     form_class = PhotoAddForm
     success_url = reverse_lazy('home')
 
+    def form_valid(self, form):
+        photo = form.save(commit=False)
+        photo.user = self.request.user
+        photo.save() #because of the many to many field
+        #form.save_m2m()
+        return super().form_valid(form)
+
+
 # def photo_add_page(request):
 #     form = PhotoAddForm(request.POST or None, request.FILES or None)
 #
