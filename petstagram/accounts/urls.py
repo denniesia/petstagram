@@ -2,7 +2,7 @@ from django.urls import path, include
 from petstagram.accounts import views
 
 urlpatterns = [
-    path('register/', views.register, name='register'),
+    path('register/', views.AppUserRegisterView.as_view(), name='register'),
     path('login/', views.login, name='login'),
 
     path('profile/<int:pk>', include([
