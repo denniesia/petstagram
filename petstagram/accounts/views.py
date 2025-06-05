@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.views.generic import CreateView
 
 from django.contrib.auth import get_user_model, login
+from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from .forms import AppUserCreationForm
 # Create your views here.
@@ -9,8 +10,8 @@ from .forms import AppUserCreationForm
 UserModel = get_user_model()
 
 
-# def login(request):
-#     return render(request, 'accounts/login-page.html')
+class AppUserLoginView(LoginView):
+    template_name = 'accounts/login-page.html'
 
 class AppUserRegisterView(CreateView):
     model = UserModel
