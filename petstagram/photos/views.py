@@ -4,8 +4,9 @@ from petstagram.photos.forms import PhotoAddForm, PhotoEditForm
 from petstagram.common.forms import CommentForm
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
 # Create your views here.
 
 class PhotoAddView(LoginRequiredMixin, CreateView): #support File Handling in get_form_kwargs()
@@ -66,14 +67,22 @@ class PhotoDetailsView(LoginRequiredMixin, DeleteView):
 
 @login_required()
 def photo_delete(request, pk):
-    Photo.objects.get(pk=pk).delete()
+    photo = Photo.objects.get(pk=pk)
+
+    if request.user == photo.user:
+        Photo.objects.get(pk=pk).delete()
+
     return redirect('home')
 
 
-class PhotoEditView(LoginRequiredMixin, UpdateView):
+class PhotoEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Photo
     form_class = PhotoEditForm
     template_name = 'photos/photo-edit-page.html'
+
+    def test_func(self):
+        photo = get_object_or_404(Photo, pk=self.kwargs['pk'])
+        return self.request.user == photo.user
 
     def get_success_url(self):
         return reverse_lazy(

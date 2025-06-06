@@ -4,7 +4,9 @@ from petstagram.pets.models import Pet
 from petstagram.pets.forms import PetAddForm, PetEditForm, PetDeleteForm
 from petstagram.common.forms import CommentForm
 from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
+from django.shortcuts import get_object_or_404
 # Create your views here.
 
 class AddPetView(LoginRequiredMixin, CreateView):
@@ -35,11 +37,15 @@ class AddPetView(LoginRequiredMixin, CreateView):
 #
 #     return render(request, 'pets/pet-add-page.html', context)
 
-class PetEditView(LoginRequiredMixin, UpdateView):
+class PetEditView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
     model = Pet
     template_name = 'pets/pet-edit-page.html'
     slug_url_kwarg = 'pet_slug'
     form_class = PetEditForm
+
+    def test_func(self):
+        pet = get_object_or_404(Pet, slug=self.kwargs['pet_slug'])
+        return self.request.user == pet.user
 
     def get_success_url(self):
         return reverse_lazy(
@@ -76,6 +82,13 @@ class PetDetailsView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context['all_photos'] = context['pet'].photo_set.all()
         context['comment_form'] = CommentForm()
+
+        all_photos = context['pet'].photo_set.all()
+
+        for photo in all_photos:
+            photo.has_liked = photo.like_set.filter(user=self.request.user).exists()
+
+        context['all_photos'] = all_photos
         return context
 
 # def pet_details_page(request, username, pet_slug):
@@ -92,12 +105,18 @@ class PetDetailsView(LoginRequiredMixin, DetailView):
 #     }
 #     return render(request, 'pets/pet-details-page.html', context)
 
-class PetDeleteView(LoginRequiredMixin, DeleteView):
+class PetDeleteView(LoginRequiredMixin,UserPassesTestMixin, DeleteView):
     model = Pet
     template_name = 'pets/pet-delete-page.html'
     form_class = PetDeleteForm
     slug_url_kwarg = 'pet_slug'
-    success_url = reverse_lazy('profile-details', kwargs={'pk': '1'})
+
+    def get_success_url(self):
+        return reverse_lazy('profile-details', kwargs={'pk': self.request.user.pk})
+
+    def test_func(self):
+        pet = get_object_or_404(Pet, slug=self.kwargs['pet_slug'])
+        return self.request.user == pet.user
 
     def get_initial(self) -> dict:
         return self.get_object().__dict__

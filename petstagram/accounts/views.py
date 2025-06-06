@@ -34,10 +34,14 @@ class AppUserRegisterView(CreateView):
 
 
 
-class ProfileDeleteView(LoginRequiredMixin, DeleteView):
+class ProfileDeleteView(LoginRequiredMixin,UserPassesTestMixin, DeleteView):
     model = Profile
     template_name = 'accounts/profile-delete-page.html'
     success_url = reverse_lazy('login')
+
+    def test_func(self):
+        profile = get_object_or_404(Profile, pk=self.kwargs['pk'])
+        return self.request.user == profile.user
 
 class ProfileDetailView(LoginRequiredMixin, DetailView):
     model = UserModel
