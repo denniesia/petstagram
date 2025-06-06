@@ -5,13 +5,13 @@ from petstagram.common.forms import CommentForm, SearchForm
 from pyperclip import copy
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic.list import ListView
-
+from django.contrib.auth.decorators import login_required
 
 class HomePage(ListView):
     model = Photo
     template_name = 'common/home-page.html'
     context_object_name = 'all_photos' #by degault is object_list
-    paginate_by = 1
+    paginate_by = 5
 
 
     def get_context_data(self, **kwargs):
@@ -19,6 +19,10 @@ class HomePage(ListView):
 
         context['comment_form'] = CommentForm()
         context['search_form'] = SearchForm(self.request.GET)
+        user = self.request.user
+
+        for photo in context['all_photos']:
+            photo.has_liked = photo.like_set.filter(user=user).exists() if user.is_authenticated else False
 
         return context
 
@@ -64,16 +68,17 @@ class HomePage(ListView):
 #
 #     return render(request, 'common/home-page.html', context)
 
-
+@login_required
 def likes_functionality(request, photo_id: int):
     liked_object = Like.objects.filter(
-        to_photo_id=photo_id
+        to_photo_id=photo_id,
+        user= request.user
     ).first()
 
     if liked_object:
         liked_object.delete()
     else:
-        like = Like(to_photo_id=photo_id, user_id=request.user)
+        like = Like(to_photo_id=photo_id, user=request.user)
         like.save()
 
     # the url where the request came from + photo id
@@ -87,6 +92,7 @@ def share_functionality(request, photo_id: int):
     return redirect(request.META.get('HTTP_REFERER')+f'#{photo_id}')
 
 
+@login_required
 def comment_functionality(request, photo_id: int):
     if request.method == 'POST':
         photo = Photo.objects.get(id=photo_id)

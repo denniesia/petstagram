@@ -4,9 +4,11 @@ from petstagram.photos.forms import PhotoAddForm, PhotoEditForm
 from petstagram.common.forms import CommentForm
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
-class PhotoAddView(CreateView): #support File Handling in get_form_kwargs()
+class PhotoAddView(LoginRequiredMixin, CreateView): #support File Handling in get_form_kwargs()
     model = Photo
     template_name = 'photos/photo-add-page.html'
     form_class = PhotoAddForm
@@ -33,7 +35,7 @@ class PhotoAddView(CreateView): #support File Handling in get_form_kwargs()
 #     }
 #     return render(request, 'photos/photo-add-page.html', context)
 
-class PhotoDetailsView(DeleteView):
+class PhotoDetailsView(LoginRequiredMixin, DeleteView):
     model = Photo
     template_name = 'photos/photo-details-page.html'
     context_object_name = 'photo' # default photo or obj
@@ -43,30 +45,32 @@ class PhotoDetailsView(DeleteView):
         context['likes'] = self.object.like_set.all()
         context['comments'] = self.object.comment_set.all()
         context['comment_form'] = CommentForm()
+        self.object.has_liked = self.object.like_set.filter(user=self.request.user).exists()
         return context
 
-def photo_details_page(request, pk):
-    photo = Photo.objects.get(pk=pk)
-    likes = photo.like_set.all()
-    comments = photo.comment_set.all()
+# @login_required()
+# def photo_details_page(request, pk):
+#     photo = Photo.objects.get(pk=pk)
+#     likes = photo.like_set.all()
+#     comments = photo.comment_set.all()
+#
+#     comment_form = CommentForm()
+#
+#     context = {
+#         'photo': photo,
+#         'likes': likes,
+#         'comments': comments,
+#         'comment_form': comment_form,
+#     }
+#     return render(request, 'photos/photo-details-page.html', context)
 
-    comment_form = CommentForm()
-
-    context = {
-        'photo': photo,
-        'likes': likes,
-        'comments': comments,
-        'comment_form': comment_form,
-    }
-    return render(request, 'photos/photo-details-page.html', context)
-
-
+@login_required()
 def photo_delete(request, pk):
     Photo.objects.get(pk=pk).delete()
     return redirect('home')
 
 
-class PhotoEditView(UpdateView):
+class PhotoEditView(LoginRequiredMixin, UpdateView):
     model = Photo
     form_class = PhotoEditForm
     template_name = 'photos/photo-edit-page.html'

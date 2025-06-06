@@ -4,9 +4,10 @@ from petstagram.pets.models import Pet
 from petstagram.pets.forms import PetAddForm, PetEditForm, PetDeleteForm
 from petstagram.common.forms import CommentForm
 from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
 # Create your views here.
 
-class AddPetView(CreateView):
+class AddPetView(LoginRequiredMixin, CreateView):
     model = Pet
     form_class = PetAddForm
     template_name =  'pets/pet-add-page.html'
@@ -34,7 +35,7 @@ class AddPetView(CreateView):
 #
 #     return render(request, 'pets/pet-add-page.html', context)
 
-class PetEditView(UpdateView):
+class PetEditView(LoginRequiredMixin, UpdateView):
     model = Pet
     template_name = 'pets/pet-edit-page.html'
     slug_url_kwarg = 'pet_slug'
@@ -66,7 +67,7 @@ class PetEditView(UpdateView):
 #
 #     return render(request, 'pets/pet-edit-page.html', context)
 
-class PetDetailsView(DetailView):
+class PetDetailsView(LoginRequiredMixin, DetailView):
     model = Pet
     template_name = 'pets/pet-details-page.html'
     slug_url_kwarg = 'pet_slug'
@@ -91,7 +92,7 @@ class PetDetailsView(DetailView):
 #     }
 #     return render(request, 'pets/pet-details-page.html', context)
 
-class PetDeleteView(DeleteView):
+class PetDeleteView(LoginRequiredMixin, DeleteView):
     model = Pet
     template_name = 'pets/pet-delete-page.html'
     form_class = PetDeleteForm
