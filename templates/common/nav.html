@@ -3,7 +3,7 @@
 <nav class="navbar"> <div class="container">
         <div class="logo">
             <!-- Link to Home Page -->
-            <a href="#">
+            <a href="{% url 'home' %}">
                 <img width="50px" src="{% static 'images/free-30-instagram-stories-icons23_122570.png' %}" alt="img1">
             </a>
             <!-- Link to Home Page -->
@@ -37,7 +37,7 @@
                         <i>Register</i>
                     </a>
                 </li>
-                 {% endif %}
+                 {% else %}
                 <li class="nav-item">
                     <!-- Link to Profile Page -->
                     <a href="{% url 'profile-details' request.user.pk %}">
@@ -48,7 +48,7 @@
                         {% csrf_token %}
                         <button class="button" type="submit"><i>Logout</i></button>
                     </form>
-
+                {% endif %}
             </ul>
 
         </div>
