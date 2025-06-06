@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views.generic import CreateView, UpdateView, DetailView
+from django.views.generic import CreateView, UpdateView, DetailView, DeleteView
 
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.views import LoginView
@@ -33,8 +33,10 @@ class AppUserRegisterView(CreateView):
 
 
 
-def profile_delete(request, pk):
-    return render(request, 'accounts/profile-delete-page.html')
+class ProfileDeleteView(DeleteView):
+    model = Profile
+    template_name = 'accounts/profile-delete-page.html'
+    success_url = reverse_lazy('login')
 
 class ProfileDetailView(DetailView):
     model = UserModel
